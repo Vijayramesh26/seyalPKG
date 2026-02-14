@@ -1,0 +1,18 @@
+[site]
+name = "Seyyal"
+tagline = "Elevate Your Daily Lifestyle"
+description = "Comprehensive billing and inventory management solution designed for retail businesses."
+logo = "/logo.svg"
+address = "123 Business Street, Chennai, Tamil Nadu"
+phone = "+91 98765 43210"
+email = "contact@seyyal.com"
+whatsapp = "+919876543210"
+opening_hours = "Mon - Sat: 9:00 AM - 9:00 PM"
+working_days = ["Mon", "Tue", "Wed", "Thu", "Fri", "Sat"]
+map_link = "https://goo.gl/maps/example"
+
+[site.socials]
+facebook = "https://facebook.com"
+instagram = "https://instagram.com"
+twitter = "https://twitter.com"
+linkedin = "https://linkedin.com"

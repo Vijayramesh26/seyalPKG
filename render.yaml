@@ -1,0 +1,25 @@
+services:
+  # Backend Service
+  - type: web
+    name: seyyal-backend
+    env: docker
+    dockerContext: backend
+    dockerfilePath: backend/Dockerfile
+    plan: free
+    region: singapore
+    envVars:
+      - key: SERVER_PORT
+        value: 8080
+      - key: COMPANY_NAME
+        value: "செயல்"
+      - key: COMPANY_LOGO
+        value: "/logo.svg"
+      # Database connection details should be added in Render Dashboard
+      - key: DB_HOST
+        sync: false
+      - key: DB_USER
+        sync: false
+      - key: DB_PASSWORD
+        sync: false
+      - key: DB_NAME
+        sync: false
