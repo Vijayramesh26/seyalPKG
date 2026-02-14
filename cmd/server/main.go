@@ -69,11 +69,16 @@ func main() {
 		authRoutes.POST("/login", authHandler.Login)
 	}
 
+	userRoutes := r.Group("/api/v1/user")
+	userRoutes.Use(middleware.AuthMiddleware())
+	{
+		userRoutes.PUT("/password", authHandler.ChangePassword)
+	}
+
 	adminHandler := &handler.AdminHandler{}
 	adminRoutes := r.Group("/api/v1/admin")
 	adminRoutes.Use(middleware.AuthMiddleware("admin"))
 	{
-		adminRoutes.PUT("/me/password", authHandler.ChangePassword)
 		adminRoutes.POST("/employees", adminHandler.CreateEmployee)
 		adminRoutes.GET("/employees", adminHandler.ListEmployees)
 		adminRoutes.PUT("/employees/:id", adminHandler.UpdateEmployee)
