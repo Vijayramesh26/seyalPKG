@@ -26,8 +26,35 @@ func Connect() {
 			dialector = postgres.Open(dbConf.URL)
 		} else {
 			dsn := dbConf.URL
-			if strings.HasPrefix(dsn, "mysql://") {
-				dsn = dsn[8:]
+			// Convert mysql:// or mariadb:// URL to DSN if needed
+			if strings.HasPrefix(dsn, "mysql://") || strings.HasPrefix(dsn, "mariadb://") {
+				log.Println("Converting URL to DSN format")
+				rawDSN := dsn
+				if strings.HasPrefix(dsn, "mysql://") {
+					rawDSN = strings.TrimPrefix(dsn, "mysql://")
+				} else {
+					rawDSN = strings.TrimPrefix(dsn, "mariadb://")
+				}
+
+				parts := strings.SplitN(rawDSN, "@", 2)
+				if len(parts) == 2 {
+					creds := parts[0]
+					rest := parts[1]
+					hostParts := strings.SplitN(rest, "/", 2)
+					if len(hostParts) == 2 {
+						hostPort := hostParts[0]
+						dbName := hostParts[1]
+						params := ""
+						if strings.Contains(dbName, "?") {
+							dbParts := strings.SplitN(dbName, "?", 2)
+							dbName = dbParts[0]
+							params = "?" + dbParts[1]
+						} else {
+							params = "?charset=utf8mb4&parseTime=True&loc=Local"
+						}
+						dsn = fmt.Sprintf("%s@tcp(%s)/%s%s", creds, hostPort, dbName, params)
+					}
+				}
 			}
 			dialector = mysql.Open(dsn)
 		}
@@ -58,6 +85,8 @@ func Connect() {
 	})
 
 	if err != nil {
+		// Log the error but be careful not to reveal sensitive info if possible
+		// However, for debugging connection issues, the full error is needed
 		log.Fatalf("Failed to connect to database: %v", err)
 	}
 
