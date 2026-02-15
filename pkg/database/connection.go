@@ -43,31 +43,40 @@ func Connect() {
 				rest := parts[1]
 
 				// Split rest at / to get host:port and dbname
-				hostParts := strings.SplitN(rest, "/", 2)
-				if len(hostParts) == 2 {
-					hostPort := hostParts[0]
-					dbName := hostParts[1]
-
-					// Handle query params if any
-					params := ""
-					if strings.Contains(dbName, "?") {
-						dbParts := strings.SplitN(dbName, "?", 2)
-						dbName = dbParts[0]
-						params = "?" + dbParts[1]
-					} else {
-						params = "?charset=utf8mb4&parseTime=True&loc=Local"
-					}
-
-					dsn = fmt.Sprintf("%s@tcp(%s)/%s%s", creds, hostPort, dbName, params)
-
-					// Mask password for logging
-					maskedCreds := creds
-					if strings.Contains(creds, ":") {
-						p := strings.SplitN(creds, ":", 2)
-						maskedCreds = p[0] + ":****"
-					}
-					log.Printf("Final DSN constructed: %s@tcp(%s)/%s%s", maskedCreds, hostPort, dbName, params)
+				hostPort := rest
+				dbName := ""
+				if strings.Contains(rest, "/") {
+					hostParts := strings.SplitN(rest, "/", 2)
+					hostPort = hostParts[0]
+					dbName = hostParts[1]
 				}
+
+				// Handle query params if any
+				params := ""
+				if strings.Contains(dbName, "?") {
+					dbParts := strings.SplitN(dbName, "?", 2)
+					dbName = dbParts[0]
+					params = "?" + dbParts[1]
+				} else if strings.Contains(hostPort, "?") {
+					// Params might be right after hostPort if / is missing
+					dbParts := strings.SplitN(hostPort, "?", 2)
+					hostPort = dbParts[0]
+					params = "?" + dbParts[1]
+				}
+
+				if params == "" {
+					params = "?charset=utf8mb4&parseTime=True&loc=Local"
+				}
+
+				dsn = fmt.Sprintf("%s@tcp(%s)/%s%s", creds, hostPort, dbName, params)
+
+				// Mask password for logging
+				maskedCreds := creds
+				if strings.Contains(creds, ":") {
+					p := strings.SplitN(creds, ":", 2)
+					maskedCreds = p[0] + ":****"
+				}
+				log.Printf("Final DSN constructed: %s@tcp(%s)/%s%s", maskedCreds, hostPort, dbName, params)
 			}
 		}
 	} else {

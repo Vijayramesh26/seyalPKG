@@ -58,6 +58,10 @@ func LoadConfig() {
 	// Enable reading from OS environment variables as fallback/override
 	viper.AutomaticEnv()
 
+	// Explicitly bind environment variables for robustness
+	viper.BindEnv("SERVER_PORT", "PORT") // Fallback to PORT if SERVER_PORT is missing
+	viper.BindEnv("DATABASE_URL")
+
 	// Manually map configuration to struct
 	AppConfig = &Config{
 		Server: ServerConfig{
@@ -100,8 +104,24 @@ func LoadConfig() {
 		}
 	}
 
-	// Set defaults if missing (optional safety)
-	if AppConfig.Server.Port == "" {
-		AppConfig.Server.Port = "8080"
-	}
+	log.Printf("Configuration loaded successfully:")
+	log.Printf("- Server Port: %s", AppConfig.Server.Port)
+	log.Printf("- Server Env: %s", AppConfig.Server.Env)
+	log.Printf("- JWT Secret Path: %s", func() string {
+		if AppConfig.Server.JWTSecret != "" {
+			return "SET"
+		}
+		return "NOT SET"
+	}())
+	log.Printf("- Database Driver: %s", AppConfig.Database.Driver)
+	log.Printf("- Database Host: %s", AppConfig.Database.Host)
+	log.Printf("- Database Port: %s", AppConfig.Database.Port)
+	log.Printf("- Database Name: %s", AppConfig.Database.Name)
+	log.Printf("- Database URL: %s", func() string {
+		if AppConfig.Database.URL != "" {
+			return "SET"
+		}
+		return "NOT SET"
+	}())
+	log.Printf("- Company Name: %s", AppConfig.Defaults.CompanyName)
 }
