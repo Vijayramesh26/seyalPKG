@@ -59,6 +59,14 @@ func Connect() {
 					}
 
 					dsn = fmt.Sprintf("%s@tcp(%s)/%s%s", creds, hostPort, dbName, params)
+
+					// Mask password for logging
+					maskedCreds := creds
+					if strings.Contains(creds, ":") {
+						p := strings.SplitN(creds, ":", 2)
+						maskedCreds = p[0] + ":****"
+					}
+					log.Printf("Final DSN constructed: %s@tcp(%s)/%s%s", maskedCreds, hostPort, dbName, params)
 				}
 			}
 		}
