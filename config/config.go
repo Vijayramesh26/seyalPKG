@@ -22,12 +22,15 @@ type ServerConfig struct {
 }
 
 type DatabaseConfig struct {
+	Type     string // mysql or postgres
 	Driver   string
 	Host     string
 	Port     string
 	User     string
 	Password string
 	Name     string
+	URL      string
+	SSL      bool
 }
 
 type DefaultsConfig struct {
@@ -66,12 +69,15 @@ func LoadConfig() {
 			JWTExpirationHours: viper.GetInt("JWT_EXPIRATION_HOURS"),
 		},
 		Database: DatabaseConfig{
+			Type:     viper.GetString("DB_TYPE"),
 			Driver:   viper.GetString("DB_DRIVER"),
 			Host:     viper.GetString("DB_HOST"),
 			Port:     viper.GetString("DB_PORT"),
 			User:     viper.GetString("DB_USER"),
 			Password: viper.GetString("DB_PASSWORD"),
 			Name:     viper.GetString("DB_NAME"),
+			URL:      viper.GetString("DATABASE_URL"),
+			SSL:      viper.GetBool("DB_SSL"),
 		},
 		Defaults: DefaultsConfig{
 			AdminPassword:   viper.GetString("ADMIN_PASSWORD"),
@@ -99,7 +105,18 @@ func LoadConfig() {
 	}
 
 	// Set defaults if missing (optional safety)
+	// Set defaults if missing
 	if AppConfig.Server.Port == "" {
 		AppConfig.Server.Port = "8080"
+	}
+	if AppConfig.Database.Type == "" {
+		AppConfig.Database.Type = "mysql"
+	}
+	if AppConfig.Database.Port == "" {
+		if AppConfig.Database.Type == "postgres" {
+			AppConfig.Database.Port = "5432"
+		} else {
+			AppConfig.Database.Port = "3306"
+		}
 	}
 }
